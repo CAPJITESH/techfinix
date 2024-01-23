@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:techfinix/constants.dart';
+import 'package:techfinix/img_helper.dart';
 import 'package:techfinix/widgets/textfield.dart';
 
 class AddVoucherPage extends StatefulWidget {
@@ -15,8 +19,17 @@ class _AddVoucherPageState extends State<AddVoucherPage> {
   TextEditingController voucherNo = TextEditingController();
   TextEditingController voucherDate = TextEditingController();
   TextEditingController projectName = TextEditingController();
-  TextEditingController expense1 = TextEditingController();
-  TextEditingController amount1 = TextEditingController();
+
+  List<TextEditingController> expenseControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
+  List<TextEditingController> amountControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
 
   List<String> projectList = [
     "Eastern Expressway",
@@ -28,6 +41,33 @@ class _AddVoucherPageState extends State<AddVoucherPage> {
   List<String> expenseType = ["Travel", "Hotel", "Medical"];
 
   int expenseCount = 3;
+  final ImageHelper _imageHelper = ImageHelper();
+
+  List<File?> images = [
+    null,
+    null,
+    null,
+  ];
+
+  void addExpense() {
+    setState(() {
+      expenseCount = expenseCount + 1;
+      expenseControllers.add(TextEditingController());
+      amountControllers.add(TextEditingController());
+      images.add(null);
+    });
+  }
+
+  void removeExpense() {
+    if (expenseCount > 1) {
+      setState(() {
+        expenseCount -= 1;
+        expenseControllers.removeLast();
+        amountControllers.removeLast();
+        images.removeLast();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +155,7 @@ class _AddVoucherPageState extends State<AddVoucherPage> {
                 hinttext: "Voucher Date",
                 readOnly: true,
                 label: "",
+                icon: Icons.calendar_month_outlined,
                 obscureText: false,
                 onTap: () {
                   showDatePicker(
@@ -234,10 +275,10 @@ class _AddVoucherPageState extends State<AddVoucherPage> {
                         ),
                         onSelected: (String? value) {
                           setState(() {
-                            expense1.text = value!;
+                            expenseControllers[i].text = value!;
                           });
                         },
-                        controller: expense1,
+                        controller: expenseControllers[i],
                         // underline: SizedBox.shrink(),
                         dropdownMenuEntries: expenseType
                             .map<DropdownMenuEntry<String>>((String value) {
@@ -250,7 +291,7 @@ class _AddVoucherPageState extends State<AddVoucherPage> {
                       Padding(
                         padding: const EdgeInsets.only(top: 5),
                         child: TextBox(
-                          controller: amount1,
+                          controller: amountControllers[i],
                           hinttext: "Amount",
                           label: "",
                           obscureText: false,
@@ -258,34 +299,59 @@ class _AddVoucherPageState extends State<AddVoucherPage> {
                           width: 90,
                         ),
                       ),
-                      DottedBorder(
-                        borderType: BorderType.RRect,
-                        radius: const Radius.circular(5),
-                        strokeWidth: 0.8,
-                        dashPattern: const [7, 7],
-                        color: grey1,
-                        child: Container(
-                          height: 45,
-                          width: 80,
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.file_upload_outlined,
-                                color: grey1,
-                                size: 20,
-                              ),
-                              Text(
-                                "Upload",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: grey1,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              )
-                            ],
+                      InkWell(
+                        onTap: () async {
+                          final file = await _imageHelper.getImage();
+                          if (file != null) {
+                            final cropped = await _imageHelper.crop(
+                                file, CropStyle.rectangle);
+                            if (cropped != null) {
+                              setState(() {
+                                images[i] = cropped;
+                              });
+                            }
+                          }
+                        },
+                        child: DottedBorder(
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(5),
+                          strokeWidth: 0.8,
+                          dashPattern: const [7, 7],
+                          color: grey1,
+                          child: Container(
+                            height: 45,
+                            width: 80,
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.all(3),
+                            child: images[i] == null
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.file_upload_outlined,
+                                        color: grey1,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        "Upload",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: grey1,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: FileImage(images[i]!),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
                           ),
                         ),
                       )
@@ -295,47 +361,80 @@ class _AddVoucherPageState extends State<AddVoucherPage> {
               const SizedBox(
                 height: 10,
               ),
-              Container(
-                width: double.infinity,
-                height: 35,
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      expenseCount = expenseCount + 1;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: color3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      removeExpense();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: red3.withOpacity(0.8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: const EdgeInsets.all(0),
+                      minimumSize: const Size(80, 30),
+                      maximumSize: const Size(80, 30),
                     ),
-                    padding: const EdgeInsets.all(0),
-                    minimumSize: const Size(80, 35),
-                    maximumSize: const Size(80, 35),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_rounded,
-                        color: color1,
-                        size: 20,
-                      ),
-                      const SizedBox(
-                        width: 3,
-                      ),
-                      Text(
-                        "Expense",
-                        style: TextStyle(
-                          color: color1,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          CupertinoIcons.delete_solid,
+                          color: red1,
+                          size: 17,
                         ),
-                      )
-                    ],
+                        const SizedBox(
+                          width: 3,
+                        ),
+                        Text(
+                          "Remove",
+                          style: TextStyle(
+                            color: red1,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
+                  ElevatedButton(
+                    onPressed: () {
+                      addExpense();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: const EdgeInsets.all(0),
+                      minimumSize: const Size(80, 30),
+                      maximumSize: const Size(80, 30),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_rounded,
+                          color: color1,
+                          size: 20,
+                        ),
+                        const SizedBox(
+                          width: 3,
+                        ),
+                        Text(
+                          "Expense",
+                          style: TextStyle(
+                            color: color1,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 60,

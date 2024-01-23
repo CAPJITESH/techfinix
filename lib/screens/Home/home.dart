@@ -106,22 +106,20 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Builder(builder: (context) {
-                return IconButton(
-                  onPressed: () {
-                    print('tapped');
-                    widget.scaffoldKey.currentState?.openDrawer();
-                  },
-                  padding: const EdgeInsets.all(0),
-                  icon: SvgPicture.asset(
-                    "assets/drawer.svg",
-                    colorFilter:
-                        const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                    width: 17,
-                    height: 19,
-                  ),
-                );
-              }),
+              IconButton(
+                onPressed: () {
+                  print('tapped');
+                  widget.scaffoldKey.currentState?.openDrawer();
+                },
+                padding: const EdgeInsets.all(0),
+                icon: SvgPicture.asset(
+                  "assets/drawer.svg",
+                  colorFilter:
+                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  width: 17,
+                  height: 19,
+                ),
+              ),
               const SizedBox(
                 width: 5,
               ),

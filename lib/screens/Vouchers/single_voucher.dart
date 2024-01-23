@@ -207,8 +207,8 @@ class _SingleVoucherCardState extends State<SingleVoucherCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      height: 45,
-                      width: 45,
+                      height: 40,
+                      width: 40,
                       decoration: BoxDecoration(
                         color: color1,
                         shape: BoxShape.circle,
@@ -239,8 +239,8 @@ class _SingleVoucherCardState extends State<SingleVoucherCard> {
                       ),
                     ),
                     Container(
-                      height: 45,
-                      width: 45,
+                      height: 40,
+                      width: 49,
                       decoration: BoxDecoration(
                         color: color1,
                         shape: BoxShape.circle,

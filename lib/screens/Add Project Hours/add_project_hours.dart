@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:techfinix/constants.dart';
+import 'package:techfinix/screens/Bottom%20Nav%20Bar/bottom_nav_bar.dart';
 import 'package:techfinix/widgets/textfield.dart';
 
 class AddProjectHours extends StatefulWidget {
+ 
+
   const AddProjectHours({super.key});
 
   @override
@@ -48,7 +51,13 @@ class _AddProjectHoursState extends State<AddProjectHours> {
             children: [
               IconButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BottomNavBar(),
+                    ),
+                    (route) => false,
+                  );
                 },
                 padding: const EdgeInsets.all(0),
                 icon: const Icon(
@@ -57,6 +66,20 @@ class _AddProjectHoursState extends State<AddProjectHours> {
                   size: 31,
                 ),
               ),
+              // IconButton(
+              //   onPressed: () {
+              //     print('tapped');
+              //     widget.scaffoldKey.currentState?.openDrawer();
+              //   },
+              //   padding: const EdgeInsets.all(0),
+              //   icon: SvgPicture.asset(
+              //     "assets/drawer.svg",
+              //     colorFilter:
+              //         const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              //     width: 17,
+              //     height: 19,
+              //   ),
+              // ),
               const SizedBox(width: 5),
               const Text(
                 'Add Project Hours',
@@ -70,7 +93,6 @@ class _AddProjectHoursState extends State<AddProjectHours> {
               IconButton(
                 onPressed: () {
                   print('tapped');
-                  // Scaffold.of(context).openDrawer();
                 },
                 icon: const Icon(
                   Icons.notifications_none_rounded,
